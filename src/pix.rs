@@ -19,6 +19,11 @@ pub enum PixReadMemError {
     ImageSizeConversion(#[from] TryFromIntError),
 }
 
+/// Error returned by Pix::read
+#[derive(Debug, Error)]
+#[error("Pix::read returned null")]
+pub struct PixReadError();
+
 impl Drop for Pix {
     fn drop(&mut self) {
         unsafe {
@@ -43,12 +48,12 @@ impl Pix {
     /// Wrapper for [`pixRead`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#a84634846cbb5e01df667d6e9241dfc53)
     ///
     /// Read an image from a filename
-    pub fn read(filename: &CStr) -> Option<Self> {
+    pub fn read(filename: &CStr) -> Result<Self, PixReadError> {
         let ptr = unsafe { pixRead(filename.as_ptr()) };
         if ptr.is_null() {
-            None
+            Err(PixReadError())
         } else {
-            Some(Self(ptr))
+            Ok(Self(ptr))
         }
     }
 
@@ -68,7 +73,7 @@ impl Pix {
 #[test]
 fn read_error_test() {
     let path = std::ffi::CString::new("fail").unwrap();
-    assert!(Pix::read(&path).is_none());
+    assert!(Pix::read(&path).is_err());
 }
 
 #[test]

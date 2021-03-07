@@ -35,12 +35,12 @@ impl Boxa {
     }
 
     /// Safely borrow the nth item
-    pub fn get(&self, n: isize) -> Option<crate::BorrowedBox> {
+    pub fn get(&self, i: isize) -> Option<crate::BorrowedBox> {
         let lboxa: &leptonica_sys::Boxa = self.as_ref();
-        if lboxa.n < std::convert::TryFrom::try_from(n).ok()? {
+        if lboxa.n < std::convert::TryFrom::try_from(i).ok()? {
             None
         } else {
-            unsafe { Some(crate::BorrowedBox::new(&*lboxa.box_.offset(n))) }
+            unsafe { Some(crate::BorrowedBox::new(&*lboxa.box_.offset(i))) }
         }
     }
 }
