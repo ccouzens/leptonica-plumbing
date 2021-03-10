@@ -3,8 +3,12 @@ name = "leptonica-plumbing"
 version = "0.1.0"
 authors = ["Chris Couzens <ccouzens@gmail.com>"]
 edition = "2018"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+description = "Safe wrapper of `leptonica-sys`"
+homepage = "https://github.com/ccouzens/leptonica-plumbing"
+repository = "https://github.com/ccouzens/leptonica-plumbing"
+readme = "README.md"
+keywords = ["leptonica", "image"]
+license = "MIT"
 
 [dependencies]
 leptonica-sys = "0.3.4"
