@@ -22,6 +22,10 @@ impl AsRef<leptonica_sys::Boxa> for Boxa {
 }
 
 impl Boxa {
+    pub unsafe fn new_from_pointer(p: *mut leptonica_sys::Boxa) -> Self {
+        Self (p)
+    }
+
     /// Wrapper for [`boxaCreate`](https://tpgit.github.io/Leptonica/boxbasic_8c.html#ae59916b7506831be9bf2119dea063253)
     ///
     /// Input: n (initial number of ptrs) Return: boxa, or null on error
