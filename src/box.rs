@@ -28,6 +28,16 @@ impl AsRef<leptonica_sys::Box> for Box {
 }
 
 impl Box {
+    /// Convinience wrapper for [create_valid]
+    pub fn new(
+        x: l_int32,
+        y: l_int32,
+        w: l_int32,
+        h: l_int32,
+    ) -> Result<Self, BoxCreateValidError> {
+        Self::create_valid(x, y, w, h)
+    }
+
     /// Wrapper for [`boxCreateValid`](https://tpgit.github.io/Leptonica/boxbasic_8c.html#a435610d86a8562dc60bfd75fe0a15420)
     ///
     /// Input: x, y, w, h Return: box
