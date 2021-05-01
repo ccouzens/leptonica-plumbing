@@ -14,6 +14,12 @@ impl<'a> AsRef<leptonica_sys::Pix> for BorrowedPix<'a> {
 }
 
 impl<'a> BorrowedPix<'a> {
+    /// Create a new BorrowedPix from a pointer
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be to a valid Pix struct.
+    /// The pix must not be mutated whilst the BorrowedPix exists.
     pub unsafe fn new(p: *mut leptonica_sys::Pix) -> Self {
         Self {
             raw: p,

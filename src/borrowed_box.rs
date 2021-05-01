@@ -9,6 +9,12 @@ impl<'a> AsRef<leptonica_sys::Box> for BorrowedBox<'a> {
 }
 
 impl<'a> BorrowedBox<'a> {
+    /// Create a new BorrowedBox from a pointer
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be to a valid Box struct.
+    /// The box must not be mutated whilst the BorrowedBox exists.
     pub unsafe fn new(b: &'a *mut leptonica_sys::Box) -> Self {
         Self(b)
     }
