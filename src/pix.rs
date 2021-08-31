@@ -45,6 +45,19 @@ impl AsRef<leptonica_sys::Pix> for Pix {
 }
 
 impl Pix {
+    /// Create a new instance from a pointer
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be to a valid `Pix` struct.
+    /// 
+    /// The structure must not be mutated or freed outside of the Rust code.
+    /// 
+    /// It must be safe for Rust to free the pointer. If this is not the case consider using [super::BorrowedPix::new].
+    pub unsafe fn new_from_pointer(ptr: *mut leptonica_sys::Pix) -> Self {
+        Self(ptr)
+    }
+
     /// Wrapper for [`pixRead`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#a84634846cbb5e01df667d6e9241dfc53)
     ///
     /// Read an image from a filename

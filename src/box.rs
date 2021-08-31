@@ -28,7 +28,7 @@ impl AsRef<leptonica_sys::Box> for Box {
 }
 
 impl Box {
-    /// Convinience wrapper for [create_valid]
+    /// Convinience wrapper for [Self::create_valid]
     pub fn new(
         x: l_int32,
         y: l_int32,
