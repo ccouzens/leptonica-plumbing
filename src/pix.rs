@@ -50,9 +50,9 @@ impl Pix {
     /// # Safety
     ///
     /// The pointer must be to a valid `Pix` struct.
-    /// 
+    ///
     /// The structure must not be mutated or freed outside of the Rust code.
-    /// 
+    ///
     /// It must be safe for Rust to free the pointer. If this is not the case consider using [super::BorrowedPix::new].
     pub unsafe fn new_from_pointer(ptr: *mut leptonica_sys::Pix) -> Self {
         Self(ptr)
