@@ -13,3 +13,4 @@ license = "MIT"
 [dependencies]
 leptonica-sys = "~0.4"
 thiserror = "1.0"
+libc = "0.2"
