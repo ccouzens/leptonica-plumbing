@@ -54,14 +54,21 @@ impl Pixa {
     }
 }
 
-#[test]
-fn read_multipage_tiff_test() {
-    let pixa =
-        Pixa::read_multipage_tiff(CStr::from_bytes_with_nul(b"multipage.tiff\0").unwrap()).unwrap();
-    assert_eq!(pixa.as_ref().n, 2);
-    assert_eq!(pixa.get_pix(0).unwrap().as_ref().w, 165);
-    assert_eq!(pixa.get_pix(0).unwrap().as_ref().h, 67);
-    assert_eq!(pixa.get_pix(1).unwrap().as_ref().w, 165);
-    assert_eq!(pixa.get_pix(1).unwrap().as_ref().h, 67);
-    assert_eq!(pixa.get_pix(2), None);
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::borrowed_pix::BorrowedPixMethods;
+
+    #[test]
+    fn read_multipage_tiff_test() {
+        let pixa =
+            Pixa::read_multipage_tiff(CStr::from_bytes_with_nul(b"multipage.tiff\0").unwrap())
+                .unwrap();
+        assert_eq!(pixa.as_ref().n, 2);
+        assert_eq!(pixa.get_pix(0).unwrap().as_ref().get_width(), 165);
+        assert_eq!(pixa.get_pix(0).unwrap().as_ref().get_height(), 67);
+        assert_eq!(pixa.get_pix(1).unwrap().as_ref().get_width(), 165);
+        assert_eq!(pixa.get_pix(1).unwrap().as_ref().get_height(), 67);
+        assert_eq!(pixa.get_pix(2), None);
+    }
 }

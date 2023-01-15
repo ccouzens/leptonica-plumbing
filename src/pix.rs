@@ -83,29 +83,34 @@ impl Pix {
     }
 }
 
-#[test]
-fn read_error_test() {
-    let path = std::ffi::CString::new("fail").unwrap();
-    assert!(Pix::read(&path).is_err());
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::borrowed_pix::BorrowedPixMethods;
 
-#[test]
-fn read_mem_error_test() {
-    assert_eq!(Pix::read_mem(&[]).err(), Some(PixReadMemError::NullPtr));
-}
+    #[test]
+    fn read_error_test() {
+        let path = std::ffi::CString::new("fail").unwrap();
+        assert!(Pix::read(&path).is_err());
+    }
 
-#[test]
-fn read_test() {
-    let path = std::ffi::CString::new("image.png").unwrap();
-    let pix = Pix::read(&path).unwrap();
-    let lpix: &leptonica_sys::Pix = pix.as_ref();
-    assert_eq!(lpix.w, 200);
-}
+    #[test]
+    fn read_mem_error_test() {
+        assert_eq!(Pix::read_mem(&[]).err(), Some(PixReadMemError::NullPtr));
+    }
 
-#[test]
-fn read_memory_test() -> Result<(), Box<dyn std::error::Error>> {
-    let pix = Pix::read_mem(include_bytes!("../image.png"))?;
-    let lpix: &leptonica_sys::Pix = pix.as_ref();
-    assert_eq!(lpix.h, 23);
-    Ok(())
+    #[test]
+    fn read_test() {
+        let path = std::ffi::CString::new("image.png").unwrap();
+        let pix = Pix::read(&path).unwrap();
+        let lpix: &leptonica_sys::Pix = pix.as_ref();
+        assert_eq!(lpix.get_width(), 200);
+    }
+
+    #[test]
+    fn read_memory_test() {
+        let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
+        let lpix: &leptonica_sys::Pix = pix.as_ref();
+        assert_eq!(lpix.get_height(), 23);
+    }
 }
