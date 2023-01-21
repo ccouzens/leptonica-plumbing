@@ -8,7 +8,7 @@ use leptonica_sys::{boxCreateValid, boxDestroy, boxGetGeometry, l_int32, l_ok};
 
 /// Wrapper around Leptonica's [`Box`](https://tpgit.github.io/Leptonica/struct_box.html) structure
 #[derive(Debug, PartialEq)]
-pub struct Box(*mut leptonica_sys::Box);
+pub struct Box(pub(crate) *mut leptonica_sys::Box);
 
 /// Error returned by Box::create_valid
 #[derive(Debug, Error)]

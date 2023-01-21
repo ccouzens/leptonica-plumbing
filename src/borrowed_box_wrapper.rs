@@ -1,14 +1,27 @@
-use leptonica_sys::{boxGetGeometry, l_int32, l_ok};
+use std::marker::PhantomData;
+
+use leptonica_sys::{boxDestroy, boxGetGeometry, l_int32, l_ok};
 
 use crate::borrowed_box::BorrowedBox;
 
 /// Borrowed wrapper around Leptonica's [`Box`](https://tpgit.github.io/Leptonica/struct_box.html) structure
-#[derive(Debug, PartialEq)]
-pub struct BorrowedBoxWrapper<'a>(&'a *mut leptonica_sys::Box);
+#[derive(Debug)]
+pub struct BorrowedBoxWrapper<'a> {
+    pub(crate) raw: *mut leptonica_sys::Box,
+    pub(crate) phantom: PhantomData<&'a *mut leptonica_sys::Box>,
+}
+
+impl Drop for BorrowedBoxWrapper<'_> {
+    fn drop(&mut self) {
+        unsafe {
+            boxDestroy(&mut self.raw);
+        }
+    }
+}
 
 impl<'a> AsRef<leptonica_sys::Box> for BorrowedBoxWrapper<'a> {
     fn as_ref(&self) -> &leptonica_sys::Box {
-        unsafe { &**self.0 }
+        unsafe { &*self.raw }
     }
 }
 
@@ -19,8 +32,11 @@ impl<'a> BorrowedBoxWrapper<'a> {
     ///
     /// The pointer must be to a valid Box struct.
     /// The box must not be mutated whilst the BorrowedBoxWrapper exists.
-    pub unsafe fn new(b: &'a *mut leptonica_sys::Box) -> Self {
-        Self(b)
+    pub unsafe fn new(b: *mut leptonica_sys::Box) -> Self {
+        Self {
+            raw: b,
+            phantom: PhantomData,
+        }
     }
 
     pub fn as_borrowed_box(&self) -> impl BorrowedBox + '_ {
@@ -38,7 +54,7 @@ impl<'a> BorrowedBox for &BorrowedBoxWrapper<'a> {
     ) -> l_ok {
         unsafe {
             boxGetGeometry(
-                *self.0,
+                self.raw,
                 match px {
                     None => std::ptr::null_mut(),
                     Some(px) => px,

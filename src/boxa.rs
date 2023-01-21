@@ -1,7 +1,11 @@
 extern crate leptonica_sys;
 extern crate thiserror;
 
-use leptonica_sys::{boxaCreate, boxaDestroy, l_int32};
+use std::{convert::TryInto, marker::PhantomData};
+
+use leptonica_sys::{boxaCreate, boxaDestroy, boxaGetBox, boxaGetCount, l_int32, L_CLONE, L_COPY};
+
+use crate::{borrowed_boxa::BorrowedBoxa, BorrowedBoxWrapper, Box};
 
 /// Wrapper around Leptonica's [`Boxa`](https://tpgit.github.io/Leptonica/struct_boxa.html) structure
 #[derive(Debug, PartialEq)]
@@ -44,13 +48,32 @@ impl Boxa {
         }
     }
 
-    /// Safely borrow the nth item
-    pub fn get(&self, i: isize) -> Option<crate::BorrowedBoxWrapper> {
-        let lboxa: &leptonica_sys::Boxa = self.as_ref();
-        if lboxa.n <= std::convert::TryFrom::try_from(i).ok()? {
-            None
-        } else {
-            unsafe { Some(crate::BorrowedBoxWrapper::new(&*lboxa.box_.offset(i))) }
+    pub fn as_borrowed_boxa(&self) -> impl BorrowedBoxa + '_ {
+        self
+    }
+}
+
+impl BorrowedBoxa for &Boxa {
+    fn get_count(&self) -> l_int32 {
+        unsafe { boxaGetCount(self.0) }
+    }
+
+    fn get_box_copied(&self, index: l_int32) -> Option<Box> {
+        unsafe {
+            boxaGetBox(self.0, index, L_COPY.try_into().unwrap())
+                .as_mut()
+                .map(|raw| Box(raw))
+        }
+    }
+
+    fn get_box_cloned(&self, index: l_int32) -> Option<BorrowedBoxWrapper> {
+        unsafe {
+            boxaGetBox(self.0, index, L_CLONE.try_into().unwrap())
+                .as_mut()
+                .map(|raw| BorrowedBoxWrapper {
+                    raw,
+                    phantom: PhantomData,
+                })
         }
     }
 }
@@ -58,7 +81,5 @@ impl Boxa {
 #[test]
 fn create_valid_test() {
     let boxa = Boxa::create(4).unwrap();
-    let lboxa: &leptonica_sys::Boxa = boxa.as_ref();
-    assert_eq!(lboxa.nalloc, 4);
-    assert_eq!(lboxa.n, 0);
+    assert_eq!(boxa.as_borrowed_boxa().get_count(), 0);
 }

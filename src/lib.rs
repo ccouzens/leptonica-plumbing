@@ -1,5 +1,6 @@
 mod borrowed_box;
 mod borrowed_box_wrapper;
+mod borrowed_boxa;
 mod borrowed_pix;
 mod borrowed_pix_wrapper;
 mod r#box;
