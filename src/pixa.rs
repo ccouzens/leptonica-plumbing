@@ -44,12 +44,12 @@ impl Pixa {
     }
 
     /// Safely borrow the nth item
-    pub fn get_pix(&self, i: isize) -> Option<crate::BorrowedPix> {
+    pub fn get_pix(&self, i: isize) -> Option<crate::BorrowedPixWrapper> {
         let lpixa: &leptonica_sys::Pixa = self.as_ref();
         if lpixa.n <= std::convert::TryFrom::try_from(i).ok()? {
             None
         } else {
-            unsafe { Some(crate::BorrowedPix::new(*lpixa.pix.offset(i))) }
+            unsafe { Some(crate::BorrowedPixWrapper::new(*lpixa.pix.offset(i))) }
         }
     }
 }
@@ -57,7 +57,7 @@ impl Pixa {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::borrowed_pix::BorrowedPixMethods;
+    use crate::borrowed_pix::BorrowedPix;
 
     #[test]
     fn read_multipage_tiff_test() {

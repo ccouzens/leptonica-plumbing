@@ -1,6 +1,8 @@
 extern crate leptonica_sys;
 extern crate thiserror;
 
+use crate::BorrowedPix;
+
 use self::leptonica_sys::{pixDestroy, pixRead, pixReadMem};
 use self::thiserror::Error;
 use std::convert::{AsRef, TryInto};
@@ -53,7 +55,7 @@ impl Pix {
     ///
     /// The structure must not be mutated or freed outside of the Rust code.
     ///
-    /// It must be safe for Rust to free the pointer. If this is not the case consider using [super::BorrowedPix::new].
+    /// It must be safe for Rust to free the pointer. If this is not the case consider using [super::BorrowedPixWrapper::new].
     pub unsafe fn new_from_pointer(ptr: *mut leptonica_sys::Pix) -> Self {
         Self(ptr)
     }
@@ -81,12 +83,16 @@ impl Pix {
             Ok(Self(ptr))
         }
     }
+
+    pub fn as_borrowed_pix(&self) -> impl BorrowedPix + '_ {
+        unsafe { *self.0 }
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::borrowed_pix::BorrowedPixMethods;
+    use crate::borrowed_pix::BorrowedPix;
 
     #[test]
     fn read_error_test() {
