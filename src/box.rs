@@ -1,8 +1,10 @@
 extern crate leptonica_sys;
 extern crate thiserror;
 
+use crate::borrowed_box::BorrowedBox;
+
 use self::thiserror::Error;
-use leptonica_sys::{boxCreateValid, boxDestroy, l_int32};
+use leptonica_sys::{boxCreateValid, boxDestroy, boxGetGeometry, l_int32, l_ok};
 
 /// Wrapper around Leptonica's [`Box`](https://tpgit.github.io/Leptonica/struct_box.html) structure
 #[derive(Debug, PartialEq)]
@@ -54,13 +56,52 @@ impl Box {
             Ok(Self(ptr))
         }
     }
+
+    pub fn as_borrowed_box(&self) -> impl BorrowedBox + '_ {
+        self
+    }
+}
+
+impl BorrowedBox for &Box {
+    fn get_geometry(
+        &self,
+        px: Option<&mut l_int32>,
+        py: Option<&mut l_int32>,
+        pw: Option<&mut l_int32>,
+        ph: Option<&mut l_int32>,
+    ) -> l_ok {
+        unsafe {
+            boxGetGeometry(
+                self.0,
+                match px {
+                    None => std::ptr::null_mut(),
+                    Some(px) => px,
+                },
+                match py {
+                    None => std::ptr::null_mut(),
+                    Some(py) => py,
+                },
+                match pw {
+                    None => std::ptr::null_mut(),
+                    Some(pw) => pw,
+                },
+                match ph {
+                    None => std::ptr::null_mut(),
+                    Some(ph) => ph,
+                },
+            )
+        }
+    }
 }
 
 #[test]
 fn create_valid_test() {
     let r#box = Box::create_valid(1, 2, 3, 4).unwrap();
-    let lbox: &leptonica_sys::Box = r#box.as_ref();
-    assert_eq!(lbox.w, 3);
+    let mut pw = 0;
+    r#box
+        .as_borrowed_box()
+        .get_geometry(None, None, Some(&mut pw), None);
+    assert_eq!(pw, 3);
 }
 
 #[test]
