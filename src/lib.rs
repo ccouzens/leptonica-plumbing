@@ -1,4 +1,5 @@
 mod borrowed_box;
+mod borrowed_box_wrapper;
 mod borrowed_pix;
 mod borrowed_pix_wrapper;
 mod r#box;
@@ -11,7 +12,7 @@ pub use leptonica_sys;
 use libc::c_char;
 use std::ffi::{c_void, CStr};
 
-pub use borrowed_box::BorrowedBox;
+pub use borrowed_box_wrapper::BorrowedBoxWrapper;
 pub use borrowed_pix::BorrowedPix;
 pub use borrowed_pix_wrapper::BorrowedPixWrapper;
 pub use boxa::Boxa;
