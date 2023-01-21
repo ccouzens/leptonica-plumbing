@@ -44,12 +44,12 @@ impl Pixa {
     }
 
     /// Safely borrow the nth item
-    pub fn get_pix(&self, i: isize) -> Option<crate::BorrowedPixWrapper> {
+    pub fn get_pix<'a>(&'a self, i: isize) -> Option<crate::BorrowedPixWrapper<'a>> {
         let lpixa: &leptonica_sys::Pixa = self.as_ref();
         if lpixa.n <= std::convert::TryFrom::try_from(i).ok()? {
             None
         } else {
-            unsafe { Some(crate::BorrowedPixWrapper::new(*lpixa.pix.offset(i))) }
+            unsafe { Some(crate::BorrowedPixWrapper::new(&*lpixa.pix.offset(i))) }
         }
     }
 }
