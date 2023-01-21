@@ -1,4 +1,5 @@
 extern crate leptonica_sys;
+use self::leptonica_sys::{l_int32, pixGetHeight, pixGetWidth};
 
 use crate::BorrowedPix;
 
@@ -24,6 +25,16 @@ impl<'a> BorrowedPixWrapper<'a> {
     }
 
     pub fn as_borrowed_pix(&self) -> impl BorrowedPix + '_ {
-        unsafe { **self.0 }
+        self
+    }
+}
+
+impl<'a> BorrowedPix for &BorrowedPixWrapper<'a> {
+    fn get_height(&self) -> l_int32 {
+        unsafe { pixGetHeight(*self.0) }
+    }
+
+    fn get_width(&self) -> l_int32 {
+        unsafe { pixGetWidth(*self.0) }
     }
 }

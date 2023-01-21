@@ -44,7 +44,7 @@ impl Pixa {
     }
 
     /// Safely borrow the nth item
-    pub fn get_pix<'a>(&'a self, i: isize) -> Option<crate::BorrowedPixWrapper<'a>> {
+    pub fn get_pix(&self, i: isize) -> Option<crate::BorrowedPixWrapper> {
         let lpixa: &leptonica_sys::Pixa = self.as_ref();
         if lpixa.n <= std::convert::TryFrom::try_from(i).ok()? {
             None
@@ -65,10 +65,10 @@ mod tests {
             Pixa::read_multipage_tiff(CStr::from_bytes_with_nul(b"multipage.tiff\0").unwrap())
                 .unwrap();
         assert_eq!(pixa.as_ref().n, 2);
-        assert_eq!(pixa.get_pix(0).unwrap().as_ref().get_width(), 165);
-        assert_eq!(pixa.get_pix(0).unwrap().as_ref().get_height(), 67);
-        assert_eq!(pixa.get_pix(1).unwrap().as_ref().get_width(), 165);
-        assert_eq!(pixa.get_pix(1).unwrap().as_ref().get_height(), 67);
+        assert_eq!(pixa.get_pix(0).unwrap().as_borrowed_pix().get_width(), 165);
+        assert_eq!(pixa.get_pix(0).unwrap().as_borrowed_pix().get_height(), 67);
+        assert_eq!(pixa.get_pix(1).unwrap().as_borrowed_pix().get_width(), 165);
+        assert_eq!(pixa.get_pix(1).unwrap().as_borrowed_pix().get_height(), 67);
         assert_eq!(pixa.get_pix(2), None);
     }
 }

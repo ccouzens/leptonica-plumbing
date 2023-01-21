@@ -1,5 +1,6 @@
 extern crate leptonica_sys;
 extern crate thiserror;
+use self::leptonica_sys::{l_int32, pixGetHeight, pixGetWidth};
 
 use crate::BorrowedPix;
 
@@ -85,14 +86,23 @@ impl Pix {
     }
 
     pub fn as_borrowed_pix(&self) -> impl BorrowedPix + '_ {
-        unsafe { *self.0 }
+        self
+    }
+}
+
+impl BorrowedPix for &Pix {
+    fn get_height(&self) -> l_int32 {
+        unsafe { pixGetHeight(self.0) }
+    }
+
+    fn get_width(&self) -> l_int32 {
+        unsafe { pixGetWidth(self.0) }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::borrowed_pix::BorrowedPix;
 
     #[test]
     fn read_error_test() {
@@ -109,14 +119,12 @@ mod tests {
     fn read_test() {
         let path = std::ffi::CString::new("image.png").unwrap();
         let pix = Pix::read(&path).unwrap();
-        let lpix: &leptonica_sys::Pix = pix.as_ref();
-        assert_eq!(lpix.get_width(), 200);
+        assert_eq!(pix.as_borrowed_pix().get_width(), 200);
     }
 
     #[test]
     fn read_memory_test() {
         let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
-        let lpix: &leptonica_sys::Pix = pix.as_ref();
-        assert_eq!(lpix.get_height(), 23);
+        assert_eq!(pix.as_borrowed_pix().get_height(), 23);
     }
 }
