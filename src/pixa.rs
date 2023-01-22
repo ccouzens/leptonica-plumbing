@@ -1,4 +1,4 @@
-use crate::{BorrowedPixWrapper, BorrowedPixa, Pix};
+use crate::{ClonedPix, BorrowedPixa, Pix};
 use leptonica_sys::{
     pixaDestroy, pixaGetCount, pixaGetPix, pixaReadMultipageTiff, L_CLONE, L_COPY,
 };
@@ -57,11 +57,11 @@ impl BorrowedPixa for Pixa {
         }
     }
 
-    fn get_pix_cloned(&self, index: leptonica_sys::l_int32) -> Option<crate::BorrowedPixWrapper> {
+    fn get_pix_cloned(&self, index: leptonica_sys::l_int32) -> Option<crate::ClonedPix> {
         unsafe {
             pixaGetPix(self.0, index, L_CLONE.try_into().unwrap())
                 .as_mut()
-                .map(|raw| BorrowedPixWrapper {
+                .map(|raw| ClonedPix {
                     raw,
                     phantom: PhantomData,
                 })

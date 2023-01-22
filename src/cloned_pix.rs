@@ -3,14 +3,15 @@ use std::marker::PhantomData;
 
 use crate::BorrowedPix;
 
-/// Borrowed wrapper around Leptonica's [`Pix`](https://tpgit.github.io/Leptonica/struct_pix.html) structure
+/// Cloned wrapper around Leptonica's [`Pix`](https://tpgit.github.io/Leptonica/struct_pix.html) structure.
+/// Follows the Rust rules of shared data being immutable. 
 #[derive(Debug, PartialEq)]
-pub struct BorrowedPixWrapper<'a> {
+pub struct ClonedPix<'a> {
     pub(crate) raw: *mut leptonica_sys::Pix,
     pub(crate) phantom: PhantomData<&'a *mut leptonica_sys::Pix>,
 }
 
-impl Drop for BorrowedPixWrapper<'_> {
+impl Drop for ClonedPix<'_> {
     fn drop(&mut self) {
         unsafe {
             pixDestroy(&mut self.raw);
@@ -18,13 +19,13 @@ impl Drop for BorrowedPixWrapper<'_> {
     }
 }
 
-impl<'a> AsRef<leptonica_sys::Pix> for BorrowedPixWrapper<'a> {
+impl<'a> AsRef<leptonica_sys::Pix> for ClonedPix<'a> {
     fn as_ref(&self) -> &leptonica_sys::Pix {
         unsafe { &*self.raw }
     }
 }
 
-impl<'a> BorrowedPixWrapper<'a> {
+impl<'a> ClonedPix<'a> {
     /// Create a new BorrowedPix from a pointer
     ///
     /// # Safety
@@ -43,7 +44,7 @@ impl<'a> BorrowedPixWrapper<'a> {
     }
 }
 
-impl<'a> BorrowedPix for &BorrowedPixWrapper<'a> {
+impl<'a> BorrowedPix for &ClonedPix<'a> {
     fn get_height(&self) -> l_int32 {
         unsafe { pixGetHeight(self.raw) }
     }
