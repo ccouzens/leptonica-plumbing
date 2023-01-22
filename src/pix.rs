@@ -1,13 +1,10 @@
-extern crate leptonica_sys;
-extern crate thiserror;
-use self::leptonica_sys::{l_int32, pixGetHeight, pixGetWidth};
+use leptonica_sys::{l_int32, pixDestroy, pixGetHeight, pixGetWidth, pixRead, pixReadMem};
 
 use crate::BorrowedPix;
 
-use self::leptonica_sys::{pixDestroy, pixRead, pixReadMem};
-use self::thiserror::Error;
 use std::convert::{AsRef, TryInto};
 use std::{ffi::CStr, num::TryFromIntError};
+use thiserror::Error;
 
 /// Wrapper around Leptonica's [`Pix`](https://tpgit.github.io/Leptonica/struct_pix.html) structure
 #[derive(Debug)]

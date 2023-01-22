@@ -1,5 +1,4 @@
-extern crate leptonica_sys;
-use self::leptonica_sys::l_int32;
+use leptonica_sys::l_int32;
 
 pub trait BorrowedPix {
     /// Wrapper for [`pixGetHeight`](https://tpgit.github.io/Leptonica/pix1_8c.html#ae40704b3acbd343639e9aed696da531f)

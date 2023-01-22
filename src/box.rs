@@ -1,10 +1,7 @@
-extern crate leptonica_sys;
-extern crate thiserror;
-
 use crate::borrowed_box::BorrowedBox;
 
-use self::thiserror::Error;
 use leptonica_sys::{boxCreateValid, boxDestroy, boxGetGeometry, l_int32, l_ok};
+use thiserror::Error;
 
 /// Wrapper around Leptonica's [`Box`](https://tpgit.github.io/Leptonica/struct_box.html) structure
 #[derive(Debug, PartialEq)]

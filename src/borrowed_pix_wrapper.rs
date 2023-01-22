@@ -1,9 +1,5 @@
-extern crate leptonica_sys;
+use leptonica_sys::{l_int32, pixDestroy, pixGetHeight, pixGetWidth};
 use std::marker::PhantomData;
-
-use leptonica_sys::pixDestroy;
-
-use self::leptonica_sys::{l_int32, pixGetHeight, pixGetWidth};
 
 use crate::BorrowedPix;
 

@@ -1,6 +1,3 @@
-extern crate leptonica_sys;
-extern crate thiserror;
-
 use std::{convert::TryInto, marker::PhantomData};
 
 use leptonica_sys::{boxaCreate, boxaDestroy, boxaGetBox, boxaGetCount, l_int32, L_CLONE, L_COPY};

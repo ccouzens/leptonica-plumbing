@@ -1,6 +1,3 @@
-extern crate leptonica_sys;
-extern crate thiserror;
-
 use crate::{BorrowedPixWrapper, BorrowedPixa, Pix};
 use leptonica_sys::{
     pixaDestroy, pixaGetCount, pixaGetPix, pixaReadMultipageTiff, L_CLONE, L_COPY,
