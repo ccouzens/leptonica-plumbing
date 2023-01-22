@@ -3,6 +3,7 @@ mod borrowed_box_wrapper;
 mod borrowed_boxa;
 mod borrowed_pix;
 mod borrowed_pix_wrapper;
+mod borrowed_pixa;
 mod r#box;
 mod boxa;
 mod pix;
@@ -14,8 +15,10 @@ use libc::c_char;
 use std::ffi::{c_void, CStr};
 
 pub use borrowed_box_wrapper::BorrowedBoxWrapper;
+pub use borrowed_boxa::BorrowedBoxa;
 pub use borrowed_pix::BorrowedPix;
 pub use borrowed_pix_wrapper::BorrowedPixWrapper;
+pub use borrowed_pixa::BorrowedPixa;
 pub use boxa::Boxa;
 pub use pix::{Pix, PixReadError, PixReadMemError};
 pub use pixa::Pixa;

@@ -1,8 +1,11 @@
 extern crate leptonica_sys;
 extern crate thiserror;
 
-use leptonica_sys::{pixaDestroy, pixaReadMultipageTiff};
-use std::ffi::CStr;
+use crate::{BorrowedPixWrapper, BorrowedPixa, Pix};
+use leptonica_sys::{
+    pixaDestroy, pixaGetCount, pixaGetPix, pixaReadMultipageTiff, L_CLONE, L_COPY,
+};
+use std::{convert::TryInto, ffi::CStr, marker::PhantomData};
 
 /// Wrapper around Leptonica's [`Pixa`](https://tpgit.github.io/Leptonica/struct_pixa.html) structure
 #[derive(Debug, PartialEq)]
@@ -42,14 +45,29 @@ impl Pixa {
             Some(Self(ptr))
         }
     }
+}
 
-    /// Safely borrow the nth item
-    pub fn get_pix(&self, i: isize) -> Option<crate::BorrowedPixWrapper> {
-        let lpixa: &leptonica_sys::Pixa = self.as_ref();
-        if lpixa.n <= std::convert::TryFrom::try_from(i).ok()? {
-            None
-        } else {
-            unsafe { Some(crate::BorrowedPixWrapper::new(&*lpixa.pix.offset(i))) }
+impl BorrowedPixa for Pixa {
+    fn get_count(&self) -> leptonica_sys::l_int32 {
+        unsafe { pixaGetCount(self.0) }
+    }
+
+    fn get_pix_copied(&self, index: leptonica_sys::l_int32) -> Option<crate::Pix> {
+        unsafe {
+            pixaGetPix(self.0, index, L_COPY.try_into().unwrap())
+                .as_mut()
+                .map(|raw| Pix(raw))
+        }
+    }
+
+    fn get_pix_cloned(&self, index: leptonica_sys::l_int32) -> Option<crate::BorrowedPixWrapper> {
+        unsafe {
+            pixaGetPix(self.0, index, L_CLONE.try_into().unwrap())
+                .as_mut()
+                .map(|raw| BorrowedPixWrapper {
+                    raw,
+                    phantom: PhantomData,
+                })
         }
     }
 }
@@ -57,18 +75,43 @@ impl Pixa {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::borrowed_pix::BorrowedPix;
+    use crate::{BorrowedPix, BorrowedPixa};
 
     #[test]
     fn read_multipage_tiff_test() {
         let pixa =
             Pixa::read_multipage_tiff(CStr::from_bytes_with_nul(b"multipage.tiff\0").unwrap())
                 .unwrap();
-        assert_eq!(pixa.as_ref().n, 2);
-        assert_eq!(pixa.get_pix(0).unwrap().as_borrowed_pix().get_width(), 165);
-        assert_eq!(pixa.get_pix(0).unwrap().as_borrowed_pix().get_height(), 67);
-        assert_eq!(pixa.get_pix(1).unwrap().as_borrowed_pix().get_width(), 165);
-        assert_eq!(pixa.get_pix(1).unwrap().as_borrowed_pix().get_height(), 67);
-        assert_eq!(pixa.get_pix(2), None);
+        assert_eq!(pixa.get_count(), 2);
+        assert_eq!(
+            pixa.get_pix_copied(0)
+                .unwrap()
+                .as_borrowed_pix()
+                .get_width(),
+            165
+        );
+        assert_eq!(
+            pixa.get_pix_cloned(0)
+                .unwrap()
+                .as_borrowed_pix()
+                .get_height(),
+            67
+        );
+        assert_eq!(
+            pixa.get_pix_copied(1)
+                .unwrap()
+                .as_borrowed_pix()
+                .get_width(),
+            165
+        );
+        assert_eq!(
+            pixa.get_pix_cloned(1)
+                .unwrap()
+                .as_borrowed_pix()
+                .get_height(),
+            67
+        );
+        assert!(pixa.get_pix_copied(2).is_none());
+        assert!(pixa.get_pix_cloned(2).is_none());
     }
 }
