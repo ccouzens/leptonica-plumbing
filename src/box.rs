@@ -5,7 +5,7 @@ use thiserror::Error;
 
 /// Wrapper around Leptonica's [`Box`](https://tpgit.github.io/Leptonica/struct_box.html) structure
 #[derive(Debug, PartialEq)]
-pub struct Box(pub(crate) *mut leptonica_sys::Box);
+pub struct Box(*mut leptonica_sys::Box);
 
 /// Error returned by Box::create_valid
 #[derive(Debug, Error)]
@@ -27,14 +27,17 @@ impl AsRef<leptonica_sys::Box> for Box {
 }
 
 impl Box {
-    /// Convinience wrapper for [Self::create_valid]
-    pub fn new(
-        x: l_int32,
-        y: l_int32,
-        w: l_int32,
-        h: l_int32,
-    ) -> Result<Self, BoxCreateValidError> {
-        Self::create_valid(x, y, w, h)
+    /// Create an owned Box from a box pointer
+    ///
+    /// # Safety
+    ///
+    /// The pointer must be to a valid Box struct.
+    /// The data pointed at may not be mutated while held by
+    /// this struct except by this struct.
+    /// On drop, the destroy method will be called (decrements
+    /// the ref counter).
+    pub unsafe fn new(b: *mut leptonica_sys::Box) -> Self {
+        Self(b)
     }
 
     /// Wrapper for [`boxCreateValid`](https://tpgit.github.io/Leptonica/boxbasic_8c.html#a435610d86a8562dc60bfd75fe0a15420)

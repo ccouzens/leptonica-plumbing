@@ -59,7 +59,7 @@ impl BorrowedBoxa for &Boxa {
         unsafe {
             boxaGetBox(self.0, index, L_COPY.try_into().unwrap())
                 .as_mut()
-                .map(|raw| Box(raw))
+                .map(|raw| Box::new(raw))
         }
     }
 
