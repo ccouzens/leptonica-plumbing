@@ -1,4 +1,4 @@
-use crate::{ClonedPix, BorrowedPixa, Pix};
+use crate::{BorrowedPixa, ClonedPix, Pix};
 use leptonica_sys::{
     pixaDestroy, pixaGetCount, pixaGetPix, pixaReadMultipageTiff, L_CLONE, L_COPY,
 };

@@ -1,4 +1,4 @@
-use std::{convert::TryInto, marker::PhantomData};
+use std::convert::TryInto;
 
 use leptonica_sys::{boxaCreate, boxaDestroy, boxaGetBox, boxaGetCount, l_int32, L_CLONE, L_COPY};
 
@@ -67,10 +67,7 @@ impl BorrowedBoxa for &Boxa {
         unsafe {
             boxaGetBox(self.0, index, L_CLONE.try_into().unwrap())
                 .as_mut()
-                .map(|raw| BorrowedBoxWrapper {
-                    raw,
-                    phantom: PhantomData,
-                })
+                .map(|raw| BorrowedBoxWrapper::new(raw))
         }
     }
 }

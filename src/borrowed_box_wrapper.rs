@@ -7,8 +7,8 @@ use crate::borrowed_box::BorrowedBox;
 /// Borrowed wrapper around Leptonica's [`Box`](https://tpgit.github.io/Leptonica/struct_box.html) structure
 #[derive(Debug)]
 pub struct BorrowedBoxWrapper<'a> {
-    pub(crate) raw: *mut leptonica_sys::Box,
-    pub(crate) phantom: PhantomData<&'a *mut leptonica_sys::Box>,
+    raw: *mut leptonica_sys::Box,
+    phantom: PhantomData<&'a *mut leptonica_sys::Box>,
 }
 
 impl Drop for BorrowedBoxWrapper<'_> {
