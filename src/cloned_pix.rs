@@ -3,8 +3,8 @@ use std::marker::PhantomData;
 
 use crate::BorrowedPix;
 
-/// Cloned wrapper around Leptonica's [`Pix`](https://tpgit.github.io/Leptonica/struct_pix.html) structure.
-/// Follows the Rust rules of shared data being immutable.
+/// Borrowed ref counted wrapper around Leptonica's [`Pix`](https://tpgit.github.io/Leptonica/struct_pix.html) structure.
+/// Leptonica uses the term cloned to mean ref-counted.
 #[derive(Debug, PartialEq)]
 pub struct ClonedPix<'a> {
     raw: *mut leptonica_sys::Pix,
