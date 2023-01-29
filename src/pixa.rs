@@ -53,7 +53,7 @@ impl BorrowedPixa for Pixa {
         unsafe {
             pixaGetPix(self.0, index, L_COPY.try_into().unwrap())
                 .as_mut()
-                .map(|raw| Pix(raw))
+                .map(|raw| Pix::new_from_pointer(raw))
         }
     }
 

@@ -8,7 +8,7 @@ use thiserror::Error;
 
 /// Wrapper around Leptonica's [`Pix`](https://tpgit.github.io/Leptonica/struct_pix.html) structure
 #[derive(Debug)]
-pub struct Pix(pub(crate) *mut leptonica_sys::Pix);
+pub struct Pix(*mut leptonica_sys::Pix);
 
 /// Error returned by Pix::read_mem
 #[derive(Debug, Error, PartialEq)]
