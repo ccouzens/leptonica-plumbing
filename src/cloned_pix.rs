@@ -7,8 +7,8 @@ use crate::BorrowedPix;
 /// Follows the Rust rules of shared data being immutable.
 #[derive(Debug, PartialEq)]
 pub struct ClonedPix<'a> {
-    pub(crate) raw: *mut leptonica_sys::Pix,
-    pub(crate) phantom: PhantomData<&'a *mut leptonica_sys::Pix>,
+    raw: *mut leptonica_sys::Pix,
+    phantom: PhantomData<&'a *mut leptonica_sys::Pix>,
 }
 
 impl Drop for ClonedPix<'_> {
@@ -26,13 +26,13 @@ impl<'a> AsRef<leptonica_sys::Pix> for ClonedPix<'a> {
 }
 
 impl<'a> ClonedPix<'a> {
-    /// Create a new BorrowedPix from a pointer
+    /// Create a new ClonedPix from a pointer
     ///
     /// # Safety
     ///
     /// The pointer must be to a valid Pix struct.
-    /// The pix must not be mutated whilst the BorrowedPix exists.
-    pub unsafe fn new(p: *mut leptonica_sys::Pix) -> Self {
+    /// The pix must not be mutated whilst the BorrowedPix exists and will be destroyed on Drop.
+    pub unsafe fn new_from_pointer(p: *mut leptonica_sys::Pix) -> Self {
         Self {
             raw: p,
             phantom: PhantomData,

@@ -2,7 +2,7 @@ use crate::{BorrowedPixa, ClonedPix, Pix};
 use leptonica_sys::{
     pixaDestroy, pixaGetCount, pixaGetPix, pixaReadMultipageTiff, L_CLONE, L_COPY,
 };
-use std::{convert::TryInto, ffi::CStr, marker::PhantomData};
+use std::{convert::TryInto, ffi::CStr};
 
 /// Wrapper around Leptonica's [`Pixa`](https://tpgit.github.io/Leptonica/struct_pixa.html) structure
 #[derive(Debug, PartialEq)]
@@ -61,10 +61,7 @@ impl BorrowedPixa for Pixa {
         unsafe {
             pixaGetPix(self.0, index, L_CLONE.try_into().unwrap())
                 .as_mut()
-                .map(|raw| ClonedPix {
-                    raw,
-                    phantom: PhantomData,
-                })
+                .map(|raw| ClonedPix::new_from_pointer(raw))
         }
     }
 }

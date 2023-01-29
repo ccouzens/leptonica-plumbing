@@ -59,7 +59,7 @@ impl BorrowedBoxa for &Boxa {
         unsafe {
             boxaGetBox(self.0, index, L_COPY.try_into().unwrap())
                 .as_mut()
-                .map(|raw| Box::new(raw))
+                .map(|raw| Box::new_from_pointer(raw))
         }
     }
 
@@ -67,7 +67,7 @@ impl BorrowedBoxa for &Boxa {
         unsafe {
             boxaGetBox(self.0, index, L_CLONE.try_into().unwrap())
                 .as_mut()
-                .map(|raw| BorrowedBoxWrapper::new(raw))
+                .map(|raw| BorrowedBoxWrapper::new_from_pointer(raw))
         }
     }
 }

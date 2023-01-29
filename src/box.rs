@@ -36,7 +36,7 @@ impl Box {
     /// this struct except by this struct.
     /// On drop, the destroy method will be called (decrements
     /// the ref counter).
-    pub unsafe fn new(b: *mut leptonica_sys::Box) -> Self {
+    pub unsafe fn new_from_pointer(b: *mut leptonica_sys::Box) -> Self {
         Self(b)
     }
 

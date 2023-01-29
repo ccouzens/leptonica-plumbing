@@ -32,7 +32,7 @@ impl<'a> BorrowedBoxWrapper<'a> {
     ///
     /// The pointer must be to a valid Box struct.
     /// The box must not be mutated whilst the BorrowedBoxWrapper exists.
-    pub unsafe fn new(b: *mut leptonica_sys::Box) -> Self {
+    pub unsafe fn new_from_pointer(b: *mut leptonica_sys::Box) -> Self {
         Self {
             raw: b,
             phantom: PhantomData,
