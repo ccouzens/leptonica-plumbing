@@ -1,7 +1,7 @@
 use self::leptonica_sys::free;
 pub use leptonica_sys;
 use libc::c_char;
-use std::ffi::CStr;
+use std::{ffi::CStr, str::Utf8Error};
 
 /// Wrapper for heap allocated leptonica strings
 #[derive(Debug)]
@@ -21,15 +21,9 @@ impl Str {
     pub unsafe fn new_from_pointer(pointer: *mut c_char) -> Self {
         Self { value: pointer }
     }
-}
 
-impl AsRef<str> for Str {
-    fn as_ref(&self) -> &str {
-        unsafe {
-            CStr::from_ptr(self.value)
-                .to_str()
-                .expect("failed to get leptonica string")
-        }
+    pub fn to_str(&self) -> Result<&str, Utf8Error> {
+        AsRef::<CStr>::as_ref(self).to_str()
     }
 }
 
