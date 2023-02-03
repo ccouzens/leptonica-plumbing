@@ -22,3 +22,26 @@ their memory safety.
 
 Having a safety layer that stays simple improves the correctness and
 maintainability of the above libraries.
+
+## Testing
+
+To test for memory leaks, test with `valgrind`.
+
+```bash
+cargo test --release && valgrind --leak-check=yes --error-exitcode=1 --leak-check=full --show-leak-kinds=all "$(find target/*/deps/ -executable -name 'leptonica_plumbing-*')"
+```
+
+You may find that leptonica always leaks 16B of memory.
+
+To test with a manually compiled Leptonica, test with additional environment
+variables
+
+```bash
+LD_LIBRARY_PATH="$(pwd)/../../DanBloomberg/leptonica/local/lib" PKG_CONFIG_PATH="$(pwd)/../../DanBloomberg/leptonica/local/lib/pkgconfig" cargo test
+```
+
+The two can be combined
+
+```bash
+LD_LIBRARY_PATH="$(pwd)/../../DanBloomberg/leptonica/local/lib" PKG_CONFIG_PATH="$(pwd)/../../DanBloomberg/leptonica/local/lib/pkgconfig" bash -c 'cargo test --release && valgrind --leak-check=yes --error-exitcode=1 --leak-check=full --show-leak-kinds=all "$(find target/*/deps/ -executable -name 'leptonica_plumbing-*')"'
+```

@@ -34,6 +34,29 @@ pub fn get_version() -> Str {
 /// Wrapper for [`getImagelibVersions`](https://github.com/DanBloomberg/leptonica/blob/1.82.0/src/libversions.c#L82-L102)
 ///
 /// Returns the image lib version identifiers as a LeptonicaString.
-pub fn get_imagelib_versions() -> Str {
-    unsafe { Str::new_from_pointer(getImagelibVersions()) }
+pub fn get_imagelib_versions() -> Option<Str> {
+    unsafe {
+        let pointer = getImagelibVersions();
+        if pointer.is_null() {
+            None
+        } else {
+            Some(Str::new_from_pointer(pointer))
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_version() {
+        assert_eq!(&get_version().to_str().unwrap()[0..10], "leptonica-");
+    }
+
+    #[test]
+    fn test_get_imagelib_versions() {
+        // No assertions, used when testing with valgrind to check for leaks
+        get_imagelib_versions();
+    }
 }
