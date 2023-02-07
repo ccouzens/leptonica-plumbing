@@ -23,6 +23,30 @@ their memory safety.
 Having a safety layer that stays simple improves the correctness and
 maintainability of the above libraries.
 
+## Memory and Naming conventions
+
+Leptonica has a few ways of managing memory.
+
+Simple `malloc`/`free`. This is used for returning strings and passes ownership
+to the caller. I don't use any prefixes for this case.
+
+Reference counted memory where we have a reference. I use the suffix `Rc` for
+this case.
+
+Reference counted memory where we don't have a reference (the reference count
+hasn't been incremented for us). I use the suffix `Reference` for this case.
+
+Reference counted memory where we don't have an exclusive reference. I use the
+prefix `Cloned` for these types. This matches how Leptonica uses the term Cloned
+and how Rust's `Rc` type uses it.
+
+---
+
+Maybe I'm thinking of this the wrong way. Instead of creating multiple types and
+trying to keep them in sync with each other, I should create Generics for the
+memory behaviour. Eg `ReferenceCounted::<Pix>`, `Borrowed::<'a, Box>` and
+finally the nothing case (`Pix`) for when we can mutate. TODO: investigate this.
+
 ## Testing
 
 To test for memory leaks, test with `valgrind`.
