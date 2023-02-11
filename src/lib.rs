@@ -6,6 +6,7 @@ mod borrowed_pixa;
 mod r#box;
 mod boxa;
 mod cloned_pix;
+mod memory;
 mod pix;
 mod pixa;
 mod str;
