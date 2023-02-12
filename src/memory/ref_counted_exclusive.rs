@@ -2,10 +2,10 @@ use super::leptonica_destroy::LeptonicaDestroy;
 use std::ops::{Deref, DerefMut};
 
 /**
- * A wrapper for ref counted leptonica pointers that can be safely mutated.
- *
- * For example if it is the only reference.
- */
+A wrapper for ref counted leptonica pointers that can be safely mutated.
+
+For example if it is the only reference.
+*/
 pub struct RefCountedExclusive<T: LeptonicaDestroy> {
     inner: T,
 }
@@ -20,7 +20,7 @@ impl<T: LeptonicaDestroy> RefCountedExclusive<T> {
      The ref count must have already been incremented before being passed to `new`.
      The pointer must not be mutated whilst this wrapper exists, except via this wrapper.
     */
-    unsafe fn new(inner: T) -> Self {
+    pub unsafe fn new(inner: T) -> Self {
         Self { inner }
     }
 }

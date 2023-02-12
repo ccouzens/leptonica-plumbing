@@ -2,3 +2,7 @@ mod borrowed_from;
 mod leptonica_destroy;
 mod ref_counted;
 mod ref_counted_exclusive;
+
+pub use self::leptonica_destroy::LeptonicaDestroy;
+pub use self::ref_counted::RefCounted;
+pub use self::ref_counted_exclusive::RefCountedExclusive;

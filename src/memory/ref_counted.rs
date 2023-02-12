@@ -2,8 +2,8 @@ use super::leptonica_destroy::LeptonicaDestroy;
 use std::ops::Deref;
 
 /**
- * A wrapper for ref counted leptonica pointers.
- */
+A wrapper for ref counted leptonica pointers.
+*/
 pub struct RefCounted<T: LeptonicaDestroy> {
     inner: T,
 }
@@ -18,7 +18,7 @@ impl<T: LeptonicaDestroy> RefCounted<T> {
      The ref count must have already been incremented before being passed to `new`.
      The pointer must not be mutated whilst this wrapper exists.
     */
-    unsafe fn new(inner: T) -> Self {
+    pub unsafe fn new(inner: T) -> Self {
         Self { inner }
     }
 }
