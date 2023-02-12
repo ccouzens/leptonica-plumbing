@@ -2,8 +2,6 @@ use std::{marker::PhantomData, ops::Deref};
 
 /**
 A non-ref counted wrapper that's valid for the lifetime of a parent struct
-
-
 */
 pub struct BorrowedFrom<'a, T: 'a> {
     inner: T,
