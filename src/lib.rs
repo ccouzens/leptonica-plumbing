@@ -1,6 +1,6 @@
 mod r#box;
 mod boxa;
-mod memory;
+pub mod memory;
 mod pix;
 mod pixa;
 mod str;
@@ -46,7 +46,8 @@ mod tests {
 
     #[test]
     fn test_get_imagelib_versions() {
-        // No assertions, used when testing with valgrind to check for leaks
+        // No assertions as there's not much we can guarantee given different compile time options.
+        // Instead used when testing with valgrind to check for leaks.
         get_imagelib_versions();
     }
 }

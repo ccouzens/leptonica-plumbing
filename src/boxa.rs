@@ -17,6 +17,12 @@ impl AsRef<leptonica_sys::Boxa> for Boxa {
     }
 }
 
+impl AsMut<leptonica_sys::Boxa> for Boxa {
+    fn as_mut(&mut self) -> &mut leptonica_sys::Boxa {
+        unsafe { &mut *self.0 }
+    }
+}
+
 impl Boxa {
     /// Create a new Boxa from a pointer
     ///
@@ -73,7 +79,36 @@ impl LeptonicaDestroy for Boxa {
 }
 
 #[test]
-fn create_valid_test() {
-    let boxa = Boxa::create(4).unwrap();
+fn get_test() {
+    use leptonica_sys::boxaAddBox;
+
+    let mut boxa = Boxa::create(4).unwrap();
     assert_eq!(boxa.get_count(), 0);
+    let mut box_1 = Box::create_valid(1, 2, 3, 4).unwrap();
+    let mut box_2 = Box::create_valid(5, 6, 7, 8).unwrap();
+    unsafe {
+        boxaAddBox(boxa.as_mut(), box_1.as_mut(), L_CLONE.try_into().unwrap());
+        boxaAddBox(boxa.as_mut(), box_2.as_mut(), L_CLONE.try_into().unwrap());
+    }
+    assert_eq!(boxa.get_count(), 2);
+
+    let box_1_cloned = boxa.get_box_cloned(0).unwrap();
+    let box_2_copied = boxa.get_box_copied(1).unwrap();
+
+    let (mut px, mut py, mut pw, mut ph) = (-1, -1, -1, -1);
+    box_1_cloned.get_geometry(Some(&mut px), Some(&mut py), Some(&mut pw), Some(&mut ph));
+    assert_eq!((px, py, pw, ph), (1, 2, 3, 4));
+    // Because Cloned reuses and reference counts the same pointer
+    assert_eq!(
+        box_1.as_ref() as *const leptonica_sys::Box,
+        box_1_cloned.as_ref() as *const leptonica_sys::Box
+    );
+
+    box_2_copied.get_geometry(Some(&mut px), Some(&mut py), Some(&mut pw), Some(&mut ph));
+    assert_eq!((px, py, pw, ph), (5, 6, 7, 8));
+    // Because Copied creates a new instance
+    assert!(
+        box_2.as_ref() as *const leptonica_sys::Box
+            != box_2_copied.as_ref() as *const leptonica_sys::Box
+    );
 }

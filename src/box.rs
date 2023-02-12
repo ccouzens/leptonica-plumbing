@@ -18,6 +18,12 @@ impl AsRef<leptonica_sys::Box> for Box {
     }
 }
 
+impl AsMut<leptonica_sys::Box> for Box {
+    fn as_mut(&mut self) -> &mut leptonica_sys::Box {
+        unsafe { &mut *self.0 }
+    }
+}
+
 impl Box {
     /// Create an owned Box from a box pointer
     ///
