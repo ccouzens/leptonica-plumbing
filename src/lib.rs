@@ -1,6 +1,3 @@
-mod borrowed_box;
-mod borrowed_box_wrapper;
-mod borrowed_boxa;
 mod r#box;
 mod boxa;
 mod memory;
@@ -12,8 +9,6 @@ use self::leptonica_sys::{getImagelibVersions, getLeptonicaVersion};
 pub use leptonica_sys;
 
 pub use crate::str::Str;
-pub use borrowed_box_wrapper::BorrowedBoxWrapper;
-pub use borrowed_boxa::BorrowedBoxa;
 pub use boxa::Boxa;
 pub use pix::{Pix, PixReadError, PixReadMemError};
 pub use pixa::Pixa;

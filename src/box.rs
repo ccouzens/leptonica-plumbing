@@ -1,4 +1,4 @@
-use crate::borrowed_box::BorrowedBox;
+use crate::memory::{LeptonicaDestroy, RefCountedExclusive};
 
 use leptonica_sys::{boxCreateValid, boxDestroy, boxGetGeometry, l_int32, l_ok};
 use thiserror::Error;
@@ -11,14 +11,6 @@ pub struct Box(*mut leptonica_sys::Box);
 #[derive(Debug, Error)]
 #[error("Box::create_valid returned null")]
 pub struct BoxCreateValidError();
-
-impl Drop for Box {
-    fn drop(&mut self) {
-        unsafe {
-            boxDestroy(&mut self.0);
-        }
-    }
-}
 
 impl AsRef<leptonica_sys::Box> for Box {
     fn as_ref(&self) -> &leptonica_sys::Box {
@@ -48,22 +40,17 @@ impl Box {
         y: l_int32,
         w: l_int32,
         h: l_int32,
-    ) -> Result<Self, BoxCreateValidError> {
+    ) -> Result<RefCountedExclusive<Self>, BoxCreateValidError> {
         let ptr = unsafe { boxCreateValid(x, y, w, h) };
         if ptr.is_null() {
             Err(BoxCreateValidError())
         } else {
-            Ok(Self(ptr))
+            Ok(unsafe { RefCountedExclusive::new(Self(ptr)) })
         }
     }
 
-    pub fn as_borrowed_box(&self) -> impl BorrowedBox + '_ {
-        self
-    }
-}
-
-impl BorrowedBox for &Box {
-    fn get_geometry(
+    /// Wrapper for [`boxGetGeometry`](https://tpgit.github.io/Leptonica/boxbasic_8c.html#aaf754e00c062c3f0f726bea73a17e646)
+    pub fn get_geometry(
         &self,
         px: Option<&mut l_int32>,
         py: Option<&mut l_int32>,
@@ -94,13 +81,19 @@ impl BorrowedBox for &Box {
     }
 }
 
+impl LeptonicaDestroy for Box {
+    fn destroy(&mut self) {
+        unsafe {
+            boxDestroy(&mut self.0);
+        }
+    }
+}
+
 #[test]
 fn create_valid_test() {
     let r#box = Box::create_valid(1, 2, 3, 4).unwrap();
     let mut pw = 0;
-    r#box
-        .as_borrowed_box()
-        .get_geometry(None, None, Some(&mut pw), None);
+    r#box.get_geometry(None, None, Some(&mut pw), None);
     assert_eq!(pw, 3);
 }
 

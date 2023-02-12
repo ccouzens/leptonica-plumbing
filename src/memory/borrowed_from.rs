@@ -1,5 +1,3 @@
-//! Todo: Is this needed!? Or should it belong in Tesseract Plumbing?
-
 use std::{marker::PhantomData, ops::Deref};
 
 /**
@@ -7,7 +5,7 @@ A non-ref counted wrapper that's valid for the lifetime of a parent struct
 
 
 */
-struct BorrowedFrom<'a, T: 'a> {
+pub struct BorrowedFrom<'a, T: 'a> {
     inner: T,
     phantom: PhantomData<&'a T>,
 }
@@ -20,7 +18,7 @@ impl<'a, T: 'a> BorrowedFrom<'a, T> {
 
      The pointer must not be mutated whilst this wrapper exists.
     */
-    unsafe fn new(inner: T) -> Self {
+    pub unsafe fn new(inner: T) -> Self {
         Self {
             inner,
             phantom: PhantomData,
