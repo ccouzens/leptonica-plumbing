@@ -71,10 +71,8 @@ impl Boxa {
 }
 
 impl LeptonicaDestroy for Boxa {
-    fn destroy(&mut self) {
-        unsafe {
-            boxaDestroy(&mut self.0);
-        }
+    unsafe fn destroy(&mut self) {
+        boxaDestroy(&mut self.0);
     }
 }
 

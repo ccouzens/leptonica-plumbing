@@ -65,10 +65,8 @@ impl Pixa {
 }
 
 impl LeptonicaDestroy for Pixa {
-    fn destroy(&mut self) {
-        unsafe {
-            pixaDestroy(&mut self.0);
-        }
+    unsafe fn destroy(&mut self) {
+        pixaDestroy(&mut self.0);
     }
 }
 

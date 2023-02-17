@@ -88,10 +88,8 @@ impl Box {
 }
 
 impl LeptonicaDestroy for Box {
-    fn destroy(&mut self) {
-        unsafe {
-            boxDestroy(&mut self.0);
-        }
+    unsafe fn destroy(&mut self) {
+        boxDestroy(&mut self.0);
     }
 }
 

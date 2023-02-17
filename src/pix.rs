@@ -1,6 +1,8 @@
-use leptonica_sys::{l_int32, pixDestroy, pixGetHeight, pixGetWidth, pixRead, pixReadMem};
+use leptonica_sys::{
+    l_int32, pixClone, pixDestroy, pixGetHeight, pixGetWidth, pixRead, pixReadMem,
+};
 
-use crate::memory::{LeptonicaDestroy, RefCountedExclusive};
+use crate::memory::{LeptonicaClone, LeptonicaDestroy, RefCountedExclusive};
 use std::convert::{AsRef, TryInto};
 use std::{ffi::CStr, num::TryFromIntError};
 use thiserror::Error;
@@ -83,10 +85,14 @@ impl Pix {
 }
 
 impl LeptonicaDestroy for Pix {
-    fn destroy(&mut self) {
-        unsafe {
-            pixDestroy(&mut self.0);
-        }
+    unsafe fn destroy(&mut self) {
+        pixDestroy(&mut self.0);
+    }
+}
+
+impl LeptonicaClone for Pix {
+    unsafe fn clone(&mut self) -> Self {
+        Self::new_from_pointer(pixClone(self.0))
     }
 }
 
@@ -115,6 +121,13 @@ mod tests {
     #[test]
     fn read_memory_test() {
         let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
+        assert_eq!(pix.get_height(), 23);
+    }
+
+    #[test]
+    fn clone_test() {
+        let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
+        let pix = pix.to_ref_counted();
         assert_eq!(pix.get_height(), 23);
     }
 }
