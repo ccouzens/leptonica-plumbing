@@ -1,10 +1,11 @@
-extern crate leptonica_sys;
-extern crate thiserror;
+use leptonica_sys::{
+    l_int32, pixClone, pixDestroy, pixGetHeight, pixGetWidth, pixRead, pixReadMem,
+};
 
-use self::leptonica_sys::{pixDestroy, pixRead, pixReadMem};
-use self::thiserror::Error;
+use crate::memory::{LeptonicaClone, LeptonicaDestroy, RefCountedExclusive};
 use std::convert::{AsRef, TryInto};
 use std::{ffi::CStr, num::TryFromIntError};
+use thiserror::Error;
 
 /// Wrapper around Leptonica's [`Pix`](https://tpgit.github.io/Leptonica/struct_pix.html) structure
 #[derive(Debug)]
@@ -23,14 +24,6 @@ pub enum PixReadMemError {
 #[derive(Debug, Error)]
 #[error("Pix::read returned null")]
 pub struct PixReadError();
-
-impl Drop for Pix {
-    fn drop(&mut self) {
-        unsafe {
-            pixDestroy(&mut self.0);
-        }
-    }
-}
 
 impl AsRef<*mut leptonica_sys::Pix> for Pix {
     fn as_ref(&self) -> &*mut leptonica_sys::Pix {
@@ -51,9 +44,7 @@ impl Pix {
     ///
     /// The pointer must be to a valid `Pix` struct.
     ///
-    /// The structure must not be mutated or freed outside of the Rust code.
-    ///
-    /// It must be safe for Rust to free the pointer. If this is not the case consider using [super::BorrowedPix::new].
+    /// The structure must not be mutated or freed outside of the Rust code whilst this instance exists.
     pub unsafe fn new_from_pointer(ptr: *mut leptonica_sys::Pix) -> Self {
         Self(ptr)
     }
@@ -61,51 +52,82 @@ impl Pix {
     /// Wrapper for [`pixRead`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#a84634846cbb5e01df667d6e9241dfc53)
     ///
     /// Read an image from a filename
-    pub fn read(filename: &CStr) -> Result<Self, PixReadError> {
+    pub fn read(filename: &CStr) -> Result<RefCountedExclusive<Self>, PixReadError> {
         let ptr = unsafe { pixRead(filename.as_ptr()) };
         if ptr.is_null() {
             Err(PixReadError())
         } else {
-            Ok(Self(ptr))
+            Ok(unsafe { RefCountedExclusive::new(Self(ptr)) })
         }
     }
 
     /// Wrapper for [`pixReadMem`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#a027a927dc3438192e3bdae8c219d7f6a)
     ///
     /// Read an image from memory
-    pub fn read_mem(img: &[u8]) -> Result<Self, PixReadMemError> {
+    pub fn read_mem(img: &[u8]) -> Result<RefCountedExclusive<Self>, PixReadMemError> {
         let ptr = unsafe { pixReadMem(img.as_ptr(), img.len().try_into()?) };
         if ptr.is_null() {
             Err(PixReadMemError::NullPtr)
         } else {
-            Ok(Self(ptr))
+            Ok(unsafe { RefCountedExclusive::new(Self(ptr)) })
         }
+    }
+
+    /// Wrapper for [`pixGetHeight`](https://tpgit.github.io/Leptonica/pix1_8c.html#ae40704b3acbd343639e9aed696da531f)
+    pub fn get_height(&self) -> l_int32 {
+        unsafe { pixGetHeight(self.0) }
+    }
+
+    /// Wrapper for [`pixGetWidth`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#aa71e0b02548a56e723c76996ab145257)
+    pub fn get_width(&self) -> l_int32 {
+        unsafe { pixGetWidth(self.0) }
     }
 }
 
-#[test]
-fn read_error_test() {
-    let path = std::ffi::CString::new("fail").unwrap();
-    assert!(Pix::read(&path).is_err());
+impl LeptonicaDestroy for Pix {
+    unsafe fn destroy(&mut self) {
+        pixDestroy(&mut self.0);
+    }
 }
 
-#[test]
-fn read_mem_error_test() {
-    assert_eq!(Pix::read_mem(&[]).err(), Some(PixReadMemError::NullPtr));
+impl LeptonicaClone for Pix {
+    unsafe fn clone(&mut self) -> Self {
+        Self::new_from_pointer(pixClone(self.0))
+    }
 }
 
-#[test]
-fn read_test() {
-    let path = std::ffi::CString::new("image.png").unwrap();
-    let pix = Pix::read(&path).unwrap();
-    let lpix: &leptonica_sys::Pix = pix.as_ref();
-    assert_eq!(lpix.w, 200);
-}
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn read_memory_test() -> Result<(), Box<dyn std::error::Error>> {
-    let pix = Pix::read_mem(include_bytes!("../image.png"))?;
-    let lpix: &leptonica_sys::Pix = pix.as_ref();
-    assert_eq!(lpix.h, 23);
-    Ok(())
+    #[test]
+    fn read_error_test() {
+        let path = std::ffi::CString::new("fail").unwrap();
+        assert!(Pix::read(&path).is_err());
+    }
+
+    #[test]
+    fn read_mem_error_test() {
+        assert_eq!(Pix::read_mem(&[]).err(), Some(PixReadMemError::NullPtr));
+    }
+
+    #[test]
+    fn read_test() {
+        let path = std::ffi::CString::new("image.png").unwrap();
+        let pix = Pix::read(&path).unwrap();
+        assert_eq!(pix.get_width(), 200);
+    }
+
+    #[test]
+    fn read_memory_test() {
+        let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
+        assert_eq!(pix.get_height(), 23);
+    }
+
+    #[test]
+    fn clone_test() {
+        let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
+        let pix = pix.to_ref_counted();
+        assert_eq!(pix.get_height(), 23);
+    }
 }
