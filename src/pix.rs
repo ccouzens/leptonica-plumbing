@@ -3,7 +3,7 @@ use leptonica_sys::{
 };
 
 use crate::memory::{LeptonicaClone, LeptonicaDestroy, RefCountedExclusive};
-use std::convert::{AsRef, TryInto};
+use std::convert::{AsRef, Infallible, TryInto};
 use std::{ffi::CStr, num::TryFromIntError};
 use thiserror::Error;
 
@@ -18,6 +18,12 @@ pub enum PixReadMemError {
     NullPtr,
     #[error("Failed to convert image size")]
     ImageSizeConversion(#[from] TryFromIntError),
+}
+
+impl From<Infallible> for PixReadMemError {
+    fn from(_: Infallible) -> Self {
+        unreachable!()
+    }
 }
 
 /// Error returned by Pix::read
