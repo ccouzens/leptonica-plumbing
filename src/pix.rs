@@ -1,5 +1,5 @@
 use leptonica_sys::{
-    l_int32, pixClone, pixDestroy, pixGetHeight, pixGetWidth, pixRead, pixReadMem,
+    l_int32, l_uint32, pixClone, pixDestroy, pixGetHeight, pixGetWidth, pixRead, pixReadMem, pixGetDepth, pixGetData
 };
 
 use crate::memory::{LeptonicaClone, LeptonicaDestroy, RefCountedExclusive};
@@ -88,6 +88,16 @@ impl Pix {
     pub fn get_width(&self) -> l_int32 {
         unsafe { pixGetWidth(self.0) }
     }
+
+    /// Wrapper for [`pixGetDepth`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#aa71e0b02548a56e723c76996ab145257)
+    pub fn get_depth(&self) -> l_int32 {
+        unsafe { pixGetDepth(self.0) }
+    }
+
+    /// Wrapper for [`pixGetData`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#aa71e0b02548a56e723c76996ab145257)
+    pub unsafe fn get_data(&self) -> *mut l_uint32 {
+        unsafe { pixGetData(self.0) }
+    }
 }
 
 impl LeptonicaDestroy for Pix {
@@ -128,6 +138,12 @@ mod tests {
     fn read_memory_test() {
         let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
         assert_eq!(pix.get_height(), 23);
+    }
+
+    #[test]
+    fn read_memory_test_02() {
+        let pix = Pix::read_mem(include_bytes!("../image.png")).unwrap();
+        assert_eq!(pix.get_depth(), 32);
     }
 
     #[test]
