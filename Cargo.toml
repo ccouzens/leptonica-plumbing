@@ -1,6 +1,6 @@
 [package]
 name = "leptonica-plumbing"
-version = "1.0.1"
+version = "1.1.0"
 authors = ["Chris Couzens <ccouzens@gmail.com>"]
 edition = "2018"
 description = "Safe wrapper of `leptonica-sys`"
