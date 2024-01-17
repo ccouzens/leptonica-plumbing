@@ -1,5 +1,6 @@
 use leptonica_sys::{
-    l_int32, l_uint32, pixClone, pixDestroy, pixGetHeight, pixGetWidth, pixRead, pixReadMem, pixGetDepth, pixGetData
+    l_int32, l_uint32, pixClone, pixDestroy, pixGetData, pixGetDepth, pixGetHeight, pixGetWidth,
+    pixRead, pixReadMem,
 };
 
 use crate::memory::{LeptonicaClone, LeptonicaDestroy, RefCountedExclusive};
@@ -40,6 +41,12 @@ impl AsRef<*mut leptonica_sys::Pix> for Pix {
 impl AsRef<leptonica_sys::Pix> for Pix {
     fn as_ref(&self) -> &leptonica_sys::Pix {
         unsafe { &*self.0 }
+    }
+}
+
+impl AsMut<leptonica_sys::Pix> for Pix {
+    fn as_mut(&mut self) -> &mut leptonica_sys::Pix {
+        unsafe { &mut *self.0 }
     }
 }
 
@@ -94,8 +101,8 @@ impl Pix {
         unsafe { pixGetDepth(self.0) }
     }
 
-    /// Wrapper for [`pixGetData`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#aa71e0b02548a56e723c76996ab145257)
-    pub unsafe fn get_data(&self) -> *mut l_uint32 {
+    /// Wrapper for [`pixGetData`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#a44546f758f2cf71bb109bfc114e3ca7f)
+    pub fn get_data(&self) -> *mut l_uint32 {
         unsafe { pixGetData(self.0) }
     }
 }

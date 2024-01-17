@@ -17,6 +17,12 @@ impl AsRef<leptonica_sys::Pixa> for Pixa {
     }
 }
 
+impl AsMut<leptonica_sys::Pixa> for Pixa {
+    fn as_mut(&mut self) -> &mut leptonica_sys::Pixa {
+        unsafe { &mut *self.0 }
+    }
+}
+
 impl Pixa {
     /// Create a new Pixa from a pointer
     ///
