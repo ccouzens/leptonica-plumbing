@@ -44,6 +44,12 @@ impl AsRef<leptonica_sys::Pix> for Pix {
     }
 }
 
+impl AsRef<Pix> for Pix {
+    fn as_ref(&self) -> &Pix {
+        self
+    }
+}
+
 impl AsMut<leptonica_sys::Pix> for Pix {
     fn as_mut(&mut self) -> &mut leptonica_sys::Pix {
         unsafe { &mut *self.0 }
