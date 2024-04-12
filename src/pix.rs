@@ -1,6 +1,6 @@
 use leptonica_sys::{
-    l_int32, l_uint32, pixClone, pixDestroy, pixGetData, pixGetDepth, pixGetHeight, pixGetWidth,
-    pixRead, pixReadMem,
+    l_float32, l_int32, l_uint32, pixClone, pixDestroy, pixGetData, pixGetDepth, pixGetHeight,
+    pixGetWidth, pixRead, pixReadMem, pixReadWithHint, pixScaleGeneral, pixTransferAllData,
 };
 
 use crate::memory::{LeptonicaClone, LeptonicaDestroy, RefCountedExclusive};
@@ -31,6 +31,14 @@ impl From<Infallible> for PixReadMemError {
 #[derive(Debug, Error)]
 #[error("Pix::read returned null")]
 pub struct PixReadError();
+
+#[derive(Debug, Error, PartialEq)]
+pub enum PixManipError {
+    #[error("some internal data moving failed")]
+    PixInternalError,
+    #[error("Pix scaling returned null")]
+    PixScaleError,
+}
 
 impl AsRef<*mut leptonica_sys::Pix> for Pix {
     fn as_ref(&self) -> &*mut leptonica_sys::Pix {
@@ -92,6 +100,52 @@ impl Pix {
         }
     }
 
+    /// Wrapper for [`pixReadWithHint`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#a3ce88fc6a624a5c5c2f698f49db1d8a5)
+    ///
+    /// Read an image from memory with hints for JPEG decoding
+    /// The valid hints are:
+    /// - [`leptonica_sys::L_JPEG_READ_LUMINANCE`] - only want luminance data; no chroma
+    /// - [`leptonica_sys::L_JPEG_CONTINUE_WITH_BAD_DATA`] - return possibly damaged pix
+    pub fn read_with_hint(
+        filename: &CStr,
+        hint: u32,
+    ) -> Result<RefCountedExclusive<Self>, PixReadError> {
+        let ptr = unsafe { pixReadWithHint(filename.as_ptr(), hint as i32) };
+        if ptr.is_null() {
+            Err(PixReadError())
+        } else {
+            Ok(unsafe { RefCountedExclusive::new(Self(ptr)) })
+        }
+    }
+
+    fn pix_transfer_data(
+        &mut self,
+        ptr: &mut *mut leptonica_sys::Pix,
+    ) -> Result<(), PixManipError> {
+        let result = unsafe { pixTransferAllData(self.0, ptr, 0, 0) };
+        if result != 0 {
+            Err(PixManipError::PixInternalError)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Wrapper for [`pixScaleGeneral`](https://tpgit.github.io/Leptonica/leptprotos_8h.html#a2f8ea34f3d02024f5d42ca05d2961177)
+    pub fn scale_general(
+        &mut self,
+        scalex: l_float32,
+        scaley: l_float32,
+    ) -> Result<(), PixManipError> {
+        let sharpwidth = if scalex.max(scaley) < 0.7 { 1 } else { 2 };
+        let mut ptr = unsafe { pixScaleGeneral(self.0, scalex, scaley, 0.0, sharpwidth) };
+        if ptr.is_null() {
+            Err(PixManipError::PixScaleError)
+        } else {
+            self.pix_transfer_data(&mut ptr)?;
+            Ok(())
+        }
+    }
+
     /// Wrapper for [`pixGetHeight`](https://tpgit.github.io/Leptonica/pix1_8c.html#ae40704b3acbd343639e9aed696da531f)
     pub fn get_height(&self) -> l_int32 {
         unsafe { pixGetHeight(self.0) }
@@ -144,6 +198,13 @@ mod tests {
     fn read_test() {
         let path = std::ffi::CString::new("image.png").unwrap();
         let pix = Pix::read(&path).unwrap();
+        assert_eq!(pix.get_width(), 200);
+    }
+
+    #[test]
+    fn read_hint_test() {
+        let path = std::ffi::CString::new("image.png").unwrap();
+        let pix = Pix::read_with_hint(&path, 0).unwrap();
         assert_eq!(pix.get_width(), 200);
     }
 
